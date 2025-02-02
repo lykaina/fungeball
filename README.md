@@ -16,6 +16,6 @@ README.md | N/A | This file.
 
 ## Documentation:
 
-Fungeball Documentation is [here](https://esolangs.org/wiki/Fungeball).
+Fungeball Documentation is [here](https://esolangs.org/wiki/Fungeball) and in this repository's wiki.
 
-I plan to convert the documentation to Markdown and keep a copy in this repository as well.
+I plan to convert the documentation to Markdown.
