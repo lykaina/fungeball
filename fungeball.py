@@ -1,5 +1,5 @@
 '''
-Fungeball Interpreter 1.0b3 Library
+Fungeball Interpreter v1.0-beta4 Library
 
 Copyright (c) 2025 Sara Berman
 
@@ -28,7 +28,7 @@ class Fungeball:
         self.fname=fname
         self.xmax=xmax
         self.ymax=ymax
-        self.stack=[]
+        self.stack=[0,0,0]
         self.xdir=1
         self.ydir=0
         self.xpos=0
@@ -41,7 +41,7 @@ class Fungeball:
         self.tstacks=[[0,0,0]]
         self.tdelta=[[1,0]]
         self.tpos=[[0,0]]
-        self.tsmode=[False]
+        self.tsmode=[[0]]
         self.tnew=False
         self.stdin=stdin
         self.stdout=stdout
@@ -368,6 +368,7 @@ class Fungeball:
             tp=[]
             td=[]
             new_t=[]
+            self.stack=[]
             for ti in range(self.threads):
                 run=0
                 self.stack=self.tstacks[ti]
@@ -375,7 +376,10 @@ class Fungeball:
                 self.ypos=self.tpos[ti][1]
                 self.xdir=self.tdelta[ti][0]
                 self.ydir=self.tdelta[ti][1]
-                self.smode=self.tsmode[ti]
+                if self.tsmode[ti][0] == 0:
+                    self.smode=False
+                else:
+                    self.smode=True
                 run=self.run_thread()
                 if run < 0 or run > 1:
                     trun=run-2
@@ -386,13 +390,19 @@ class Fungeball:
                         pass
                     else:
                         tn=tn+1
-                        new_t.append([self.stack,[self.xpos - self.xdir,self.ypos - self.ydir],[self.xdir*-1,self.ydir*-1],self.smode])
+                        new_t.append([[],[(self.xmax + self.xpos - self.xdir) % self.xmax,(self.ymax + self.ypos - self.ydir) % self.ymax],[self.xdir*-1,self.ydir*-1],[0]])
+                        for si in range(len(self.stack)):
+                            new_t[0].append(self.stack[si])
                         self.tnew=False
                     self.move_pc()
                     ts.append(self.stack)
                     tp.append([self.xpos,self.ypos])
                     td.append([self.xdir,self.ydir])
-                    tsm.append(self.smode)
+                    if self.smode == False:
+                        tsm.append([0])
+                    else:
+                        tsm.append([1])
+                self.stack=[]
             if len(new_t) > 0:
                 i=0
                 for i in range(len(new_t)):
@@ -400,6 +410,9 @@ class Fungeball:
                     tp.append(new_t[i][1])
                     td.append(new_t[i][2])
                     tsm.append(new_t[i][3])
+            else:
+                pass
+            #print('{',tn,ts,tp,td,tsm,'}')
             self.tstacks=ts
             self.tpos=tp
             self.tdelta=td
