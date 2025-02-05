@@ -14,6 +14,7 @@ fungeball_run.py | No | The wrapper for the Fungeball implementation.
 fungeball.py | Yes | The library for the Fungeball implementation.
 LICENSE | N/A | An MIT License.
 README.md | N/A | This file.
+circuitpython/ | N/A | CircuitPython versions of bef93.py and fungeball.py.
 
 ## Documentation:
 
