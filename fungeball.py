@@ -1,5 +1,5 @@
 '''
-Fungeball Interpreter v1.0-beta5 Library
+Fungeball Interpreter v1.0-beta5a Library
 
 Copyright (c) 2025 Sara Berman
 
@@ -46,7 +46,7 @@ class Fungeball:
         self.tnew=False
         self.stdin=stdin
         self.stdout=stdout
-        self.cstack=[0,0,0]
+        self.cstack=[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
     def buf_in(self):
         _in=self.stdin.read(1)
         if _in == None or _in == '':
@@ -163,14 +163,14 @@ class Fungeball:
             self.stack=[0,self.stack[0],self.stack[1]]
         else:
             pass
-        if len(self.cstack) == 0:
-            self.cstack=[0,0,0]
-        elif len(self.cstack) == 1:
-            self.cstack=[0,0,self.cstack[0]]
-        elif len(self.cstack) == 2:
-            self.cstack=[0,self.cstack[0],self.cstack[1]]
-        else:
-            pass
+        i=0
+        for i in range(16):
+            if len(self.cstack[i]) == 0:
+                self.cstack[i]=[0,0]
+            elif len(self.cstack[i]) == 1:
+                self.cstack[i]=[0,self.cstack[i][0]]
+            else:
+                pass
         if self.smode == False:
             if gch == b' ':
                 pass
@@ -351,16 +351,30 @@ class Fungeball:
             elif gch == b'z':
                 pass
             elif gch == b'i':
+                b=self.stack.pop()
                 a=self.stack.pop()
-                self.cstack.append(a)
+                self.cstack[b%16].append(a)
             elif gch == b'o':
-                a=self.cstack.pop()
+                b=self.stack.pop()
+                a=self.cstack[b%16].pop()
                 self.stack.append(a)
             elif gch == b'w':
                 if self.threads == 1:
                     self.waitmode=False
                 else:
                     self.waitmode=True
+            elif gch == b'a':
+                self.stack.append(10)
+            elif gch == b'b':
+                self.stack.append(11)
+            elif gch == b'c':
+                self.stack.append(12)
+            elif gch == b'd':
+                self.stack.append(13)
+            elif gch == b'e':
+                self.stack.append(14)
+            elif gch == b'f':
+                self.stack.append(15)
             else:
                 self.xdir=self.xdir*-1
                 self.ydir=self.ydir*-1
