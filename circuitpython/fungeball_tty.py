@@ -1,30 +1,32 @@
 '''
-Befunge-93 Interpreter v1.0-beta4-circuitpython Library
+Fungeball Interpreter v1.0-beta4tty Library
 
 Copyright (c) 2025 Sara Berman
 
-Permission is hereby granted, free of charge, to any person obtaining a 
-copy of this software and associated documentation files (the "Software"), 
-to deal in the Software without restriction, including without limitation 
-the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-and/or sell copies of the Software, and to permit persons to whom the 
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
 Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in 
+The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 '''
 
-class BEF93:
+class Fungeball:
     def __init__(self,fname,xmax=80,ymax=25):
-        from sys import stdin, stdout
+        from board import GP0, GP1
+        from busio import UART
+        #from sys import stdin, stdout
         self.fname=fname
         self.xmax=xmax
         self.ymax=ymax
@@ -37,38 +39,45 @@ class BEF93:
         self.grid=[]
         self.ibuf=b''
         self.obuf=b''
-        self.stdin=stdin
-        self.stdout=stdout
+        self.threads=1
+        self.tstacks=[[0,0,0]]
+        self.tdelta=[[1,0]]
+        self.tpos=[[0,0]]
+        self.tsmode=[[0]]
+        self.tnew=False
+        #self.stdin=stdin
+        #self.stdout=stdout
+        self.uart=UART(GP0,GP1,baudrate=115200)
     def buf_in(self):
-        _in=self.stdin.read(1)
-        if _in == None or _in == '':
+        _in=self.uart.read()
+        if _in == None or _in == b'':
             pass
         else:
-            self.ibuf=self.ibuf+_in.encode()
+            self.ibuf=self.ibuf+_in
     def buf_in_pop(self):
         _r=self.ibuf[0]
         if len(self.ibuf) > 1:
             self.ibuf=self.ibuf[1:]
         else:
             self.ibuf=b''
-        #if _r == 13:
-        #    _r = 10
-        #else:
-        #    pass
+        if _r == 13:
+            _r = 10
+        else:
+            pass
         return _r
     def buf_in_get(self):
         while self.ibuf == b'':
             self.buf_in()
     def buf_out(self):
         while len(self.obuf) > 1:
-            self.stdout.write(chr(self.obuf[0]))
+            self.uart.write(chr(self.obuf[0]).encode())
             self.obuf=self.obuf[1:]
         if len(self.obuf) == 1:
-            self.stdout.write(chr(self.obuf[0]))
+            self.uart.write(chr(self.obuf[0]).encode())
             self.obuf=b''
     def buf_out_put(self,chin):
         if chin.encode() == b'\n':
-            self.obuf=self.obuf+b'\n'
+            self.obuf=self.obuf+b'\r\n'
         else:
             self.obuf=self.obuf+chin.encode()
     def make_grid(self):
@@ -325,6 +334,15 @@ class BEF93:
                 self.stack.append(8)
             elif gch == b'9':
                 self.stack.append(9)
+            elif gch == b'n':
+                self.stack=[0,0,0]
+            elif gch == b'q':
+                a=self.stack.pop()
+                ret=a+2
+            elif gch == b't':
+                self.tnew=True
+            elif gch == b'z':
+                pass
             else:
                 self.xdir=self.xdir*-1
                 self.ydir=self.ydir*-1
@@ -334,22 +352,85 @@ class BEF93:
             else:
                 self.stack.append(gch[0])
         return ret
-    def run_grid(self):
-        run=0
-        while run == 0:
-            cmdch = self.grid[self.ypos][self.xpos]
-            while cmdch == b' ' and self.smode == False:
-                self.move_pc()
-                cmdch = self.grid[self.ypos][self.xpos]
-            run=self.run_char(cmdch)
-            self.buf_out()
+    def run_thread(self):
+        tr=0
+        cmdch = self.grid[self.ypos][self.xpos]
+        while cmdch == b' ' and self.smode == False:
             self.move_pc()
+            cmdch = self.grid[self.ypos][self.xpos]
+        tr=self.run_char(cmdch)
+        self.buf_out()
+        return tr
+    def run_grid(self):
+        trun=0
+        while trun == 0 and self.threads > 0:
+            ti=0
+            tn=self.threads
+            ts=[]
+            tsm=[]
+            tp=[]
+            td=[]
+            new_t=[]
+            self.stack=[]
+            for ti in range(self.threads):
+                run=0
+                self.stack=self.tstacks[ti]
+                self.xpos=self.tpos[ti][0]
+                self.ypos=self.tpos[ti][1]
+                self.xdir=self.tdelta[ti][0]
+                self.ydir=self.tdelta[ti][1]
+                if self.tsmode[ti][0] == 0:
+                    self.smode=False
+                else:
+                    self.smode=True
+                run=self.run_thread()
+                if run < 0 or run > 1:
+                    trun=run-2
+                elif run == 1:
+                    tn=tn-1
+                else:
+                    if self.tnew == False:
+                        pass
+                    else:
+                        tn=tn+1
+                        new_t.append([[],[(self.xmax + self.xpos - self.xdir) % self.xmax,(self.ymax + self.ypos - self.ydir) % self.ymax],[self.xdir*-1,self.ydir*-1],[0]])
+                        for si in range(len(self.stack)):
+                            new_t[0].append(self.stack[si])
+                        self.tnew=False
+                    self.move_pc()
+                    ts.append(self.stack)
+                    tp.append([self.xpos,self.ypos])
+                    td.append([self.xdir,self.ydir])
+                    if self.smode == False:
+                        tsm.append([0])
+                    else:
+                        tsm.append([1])
+                self.stack=[]
+            if len(new_t) > 0:
+                i=0
+                for i in range(len(new_t)):
+                    ts.append(new_t[i][0])
+                    tp.append(new_t[i][1])
+                    td.append(new_t[i][2])
+                    tsm.append(new_t[i][3])
+            else:
+                pass
+            #print('{',tn,ts,tp,td,tsm,'}')
+            self.tstacks=ts
+            self.tpos=tp
+            self.tdelta=td
+            self.tsmode=tsm
+            self.threads=tn
+        return trun
 
 def main(file,xmax=80,ymax=25):
     import gc
-    bef=BEF93(file,xmax,ymax)
-    bef.make_grid()
+    from sys import exit as sys_exit
+    bft=Fungeball(file,xmax,ymax)
+    bft.make_grid()
     gc.collect()
-    bef.run_grid()
-    del bef
+    rv=bft.run_grid()
+    del bft
     gc.collect()
+    if rv != 0:
+        sys_exit(abs(rv)%256)
