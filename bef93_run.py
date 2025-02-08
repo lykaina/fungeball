@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 '''
-Befunge-93 Interpreter 1.0b3 Wrapper
+Befunge-93 Interpreter v1.0-beta5a Wrapper
 
 Copyright (c) 2025 Sara Berman
 
