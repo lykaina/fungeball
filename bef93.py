@@ -1,5 +1,5 @@
 '''
-Befunge-93 Interpreter 1.0b3 Library
+Befunge-93 Interpreter v1.0-beta5 Library
 
 Copyright (c) 2025 Sara Berman
 
@@ -89,7 +89,7 @@ class BEF93:
         for yi in range(len(flsts)):
             lt=[]
             for xi in range(flsts[yi]):
-                lt.append((flst[yi][xi]).to_bytes())
+                lt.append((flst[yi][xi]).to_bytes(1))
             gt.append(lt)
             del lt
         del flst
@@ -144,8 +144,8 @@ class BEF93:
         self.ypos=(self.ymax+self.ypos+self.ydir)%self.ymax
     def run_char(self,gch=b' '):
         from random import seed,randint
-        from time import time_ns
-        from math import floor,log10
+        from time import monotonic_ns
+        from math import floor,log
         ret=0
         if len(self.stack) == 0:
             self.stack=[0,0,0]
@@ -204,7 +204,7 @@ class BEF93:
                 self.xdir=0
                 self.ydir=1
             elif gch == b'?':
-                seed(time_ns())
+                seed(monotonic_ns())
                 r=randint(0,3)
                 if r == 0:
                     self.xdir=0
@@ -256,7 +256,7 @@ class BEF93:
                 s=0
                 o=''
                 if a != 0:
-                    l=floor(log10(abs(a)))
+                    l=floor(log(abs(a),10))
                     s=a//abs(a)
                 else:
                     l=0
