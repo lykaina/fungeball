@@ -1,5 +1,5 @@
 '''
-Fungeball Interpreter v1.0-beta5 Library
+Fungeball Interpreter v1.0-beta5-repl Library
 
 Copyright (c) 2025 Sara Berman
 
