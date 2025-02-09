@@ -1,5 +1,5 @@
 '''
-Fungeball Interpreter v1.0-beta7 Library
+Fungeball Interpreter v1.0-beta7-tty Library
 
 Copyright (c) 2025 Sara Berman
 
@@ -24,7 +24,9 @@ SOFTWARE.
 
 class Fungeball:
     def __init__(self,fname,xmax=128,ymax=32):
-        from sys import stdin, stdout
+        from board import GP0, GP1
+        from busio import UART
+        #from sys import stdin, stdout
         self.fname=fname
         self.xmax=xmax
         self.ymax=ymax
@@ -47,39 +49,40 @@ class Fungeball:
         self.tlabels=[[0]]
         self.tnew=False
         self.tinit=False
-        self.stdin=stdin
-        self.stdout=stdout
+        #self.stdin=stdin
+        #self.stdout=stdout
+        self.uart=UART(GP0,GP1,baudrate=115200)
         self.cstack=[[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0],[0,0]]
     def buf_in(self):
-        _in=self.stdin.read(1)
-        if _in == None or _in == '':
+        _in=self.uart.read()
+        if _in == None or _in == b'':
             pass
         else:
-            self.ibuf=self.ibuf+_in.encode()
+            self.ibuf=self.ibuf+_in
     def buf_in_pop(self):
         _r=self.ibuf[0]
         if len(self.ibuf) > 1:
             self.ibuf=self.ibuf[1:]
         else:
             self.ibuf=b''
-        #if _r == 13:
-        #    _r = 10
-        #else:
-        #    pass
+        if _r == 13:
+            _r = 10
+        else:
+            pass
         return _r
     def buf_in_get(self):
         while self.ibuf == b'':
             self.buf_in()
     def buf_out(self):
         while len(self.obuf) > 1:
-            self.stdout.write(chr(self.obuf[0]))
+            self.uart.write(chr(self.obuf[0]).encode())
             self.obuf=self.obuf[1:]
         if len(self.obuf) == 1:
-            self.stdout.write(chr(self.obuf[0]))
+            self.uart.write(chr(self.obuf[0]).encode())
             self.obuf=b''
     def buf_out_put(self,chin):
         if chin.encode() == b'\n':
-            self.obuf=self.obuf+b'\n'
+            self.obuf=self.obuf+b'\r\n'
         else:
             self.obuf=self.obuf+chin.encode()
     def make_grid(self):
@@ -157,7 +160,7 @@ class Fungeball:
         for yi in range(self.ymax):
             lt=[]
             for xi in range(self.xmax):
-                lt.append(self.stdin.read(1).encode())
+                lt.append(self.uart.read(1))
             ngrid.append(lt)
         self.grid=ngrid
     def move_pc(self):
