@@ -1,0 +1,294 @@
+<h1>Fungeball v1.0-beta7</h1>
+
+<h2>Full Instructions:</h2>
+
+<p>Note: Anything described as (Experimental) has not yet been debugged and should be avoided until no longer marked as experimental.</p>
+
+<table>
+<thead>
+<tr>
+  <th>Cmd</th>
+  <th>Name</th>
+  <th>Stack (Bot->Top)</th>
+  <th>Result (Stack) / Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>SPC</td>
+  <td>Space</td>
+  <td></td>
+  <td>Empty Cell</td>
+</tr>
+<tr>
+  <td>!</td>
+  <td>Not</td>
+  <td>a</td>
+  <td>Push 0 if a is non-zero, 1 otherwise.</td>
+</tr>
+<tr>
+  <td>"</td>
+  <td>Stringmode</td>
+  <td></td>
+  <td>Toggle "Stringmode"</td>
+</tr>
+<tr>
+  <td>#</td>
+  <td>Bridge</td>
+  <td></td>
+  <td>'jumps' over next command</td>
+</tr>
+<tr>
+  <td>$</td>
+  <td>Pop</td>
+  <td>a</td>
+  <td>Does nothing</td>
+</tr>
+<tr>
+  <td>%</td>
+  <td>Modulo</td>
+  <td>a b</td>
+  <td>a % b</td>
+</tr>
+<tr>
+  <td>&amp;</td>
+  <td>Input Int</td>
+  <td></td>
+  <td>value inputted</td>
+</tr>
+<tr>
+  <td>*</td>
+  <td>Multiply</td>
+  <td>a b</td>
+  <td>a * b</td>
+</tr>
+<tr>
+  <td>+</td>
+  <td>Add</td>
+  <td>a b</td>
+  <td>a + b</td>
+</tr>
+<tr>
+  <td>,</td>
+  <td>Output Char</td>
+  <td>a</td>
+  <td>Output a as char.</td>
+</tr>
+<tr>
+  <td>-</td>
+  <td>Subtract</td>
+  <td>a b</td>
+  <td>a - b</td>
+</tr>
+<tr>
+  <td>.</td>
+  <td>Output Int</td>
+  <td>a</td>
+  <td>Output a as int.</td>
+</tr>
+<tr>
+  <td>/</td>
+  <td>Divide</td>
+  <td>a b</td>
+  <td>a / b (int div)</td>
+</tr>
+<tr>
+  <td>0-9</td>
+  <td>0-9</td>
+  <td></td>
+  <td>Push decimal value 0-9 to thread stack.</td>
+</tr>
+<tr>
+  <td>:</td>
+  <td>Dup</td>
+  <td>a</td>
+  <td>a a</td>
+</tr>
+<tr>
+  <td>&lt;</td>
+  <td>Left</td>
+  <td></td>
+  <td>PC -> Left</td>
+</tr>
+<tr>
+  <td>></td>
+  <td>Right</td>
+  <td></td>
+  <td>PC -> Right</td>
+</tr>
+<tr>
+  <td>?</td>
+  <td>Random</td>
+  <td></td>
+  <td>PC -> Up, down, left, or right.</td>
+</tr>
+<tr>
+  <td>@</td>
+  <td>End Thread</td>
+  <td></td>
+  <td>Ends any thread that touches it. If no threads are left, the program quits with a return code of 0.</td>
+</tr>
+<tr>
+  <td>\</td>
+  <td>Swap</td>
+  <td>a b</td>
+  <td>b a</td>
+</tr>
+<tr>
+  <td>^</td>
+  <td>Up</td>
+  <td></td>
+  <td>PC -> Up</td>
+</tr>
+<tr>
+  <td>_</td>
+  <td>Horizontal If</td>
+  <td>a</td>
+  <td>PC -> Left if a is non-zero, PC -> Right if a is zero</td>
+</tr>
+<tr>
+  <td>`</td>
+  <td>Greater</td>
+  <td>a b</td>
+  <td>1 if a &gt; b , 0 otherwise</td>
+</tr>
+<tr>
+  <td>a-f</td>
+  <td>a-f</td>
+  <td></td>
+  <td>Push decimal value 10-15 to thread stack.</td>
+</tr>
+<tr>
+  <td>g</td>
+  <td>Get</td>
+  <td>x y</td>
+  <td>value at grid(x,y)</td>
+</tr>
+<tr>
+  <td>h</td>
+  <td>Hex</td>
+  <td>a b</td>
+  <td>Push a*16+(b%16) to thread stack.</td>
+</tr>
+<tr>
+  <td>i</td>
+  <td>Push to Common Stack</td>
+  <td></td>
+  <td>Pop b,a from thread stack and then Push a to common stack b%16.</td>
+</tr>
+<tr>
+  <td>j</td>
+  <td>Jump</td>
+  <td>d x y</td>
+  <td>move to location x,y on grid, use d as delta in format deg/90.</td>
+</tr>
+<tr>
+  <td>k</td>
+  <td>Keep At</td>
+  <td>a</td>
+  <td>Do Nothing, not even move, until there are no 'threads' with label value a.</td>
+</tr>
+<tr>
+  <td>l</td>
+  <td>Label</td>
+  <td>a</td>
+  <td>(Re-)Label 'thread' with value a.</td>
+</tr>
+<tr>
+  <td>m</td>
+  <td>Clear a Common Stack</td>
+  <td>a</td>
+  <td>Clear Common Stack (a%16).</td>
+</tr>
+<tr>
+  <td>n</td>
+  <td>Clear Stack</td>
+  <td></td>
+  <td>Clears thread stack.</td>
+</tr>
+<tr>
+  <td>o</td>
+  <td>Pop from Common Stack</td>
+  <td>b</td>
+  <td>Pop a from common stack b%16, and then Push a to thread stack.</td>
+</tr>
+<tr>
+  <td>p</td>
+  <td>Put</td>
+  <td>a x y</td>
+  <td>puts a at grid(x,y)</td>
+</tr>
+<tr>
+  <td>q</td>
+  <td>Quit</td>
+  <td>r</td>
+  <td>Quit the program with a return code of abs(r)%256.</td>
+</tr>
+<tr>
+  <td>r</td>
+  <td>Reflect</td>
+  <td></td>
+  <td>Reverses Delta (180 degree turn).</td>
+</tr>
+<tr>
+  <td>s</td>
+  <td>Load Grid and Restart</td>
+  <td></td>
+  <td>(Experimental) Read xmax*ymax bytes from input and store to playfield, and reinitialize program.</td>
+</tr>
+<tr>
+  <td>t</td>
+  <td>Split</td>
+  <td></td>
+  <td>Start a new thread traveling in the direction 180 degrees from current.</td>
+</tr>
+<tr>
+  <td>u</td>
+  <td>Get Delta</td>
+  <td></td>
+  <td>Push delta to thread stack in format deg/90.</td>
+</tr>
+<tr>
+  <td>v</td>
+  <td>Down</td>
+  <td></td>
+  <td>PC -> Down</td>
+</tr>
+<tr>
+  <td>w</td>
+  <td>Wait</td>
+  <td>a</td>
+  <td>Do Nothing, not even move, until there are at most (a+1) threads.</td>
+</tr>
+<tr>
+  <td>x</td>
+  <td>Hex with 8-bit output</td>
+  <td>a b</td>
+  <td>Push (a%16)*16+(b%16) to thread stack.</td>
+</tr>
+<tr>
+  <td>y</td>
+  <td>Set Delta</td>
+  <td>a</td>
+  <td>Set delta to a in format deg/90.</td>
+</tr>
+<tr>
+  <td>z</td>
+  <td>No Op</td>
+  <td></td>
+  <td>Does Nothing except use up a cycle.</td>
+</tr>
+<tr>
+  <td>|</td>
+  <td>Vertical If</td>
+  <td>a</td>
+  <td>PC -> Up if a is non-zero, PC -> Down if a is zero</td>
+</tr>
+<tr>
+  <td>~</td>
+  <td>Input Char</td>
+  <td></td>
+  <td>Char entered.</td>
+</tr>
+</tbody>
+</table>
