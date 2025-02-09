@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 '''
-Fungeball Interpreter v1.0-beta6 Wrapper
+Fungeball Interpreter v1.0-beta7 Wrapper
 
 Copyright (c) 2025 Sara Berman
 
@@ -29,8 +29,8 @@ def wrapper():
     import fungeball
     parser = argparse.ArgumentParser("fungeball_run")
     parser.add_argument('file', help='File Name', type=str)
-    parser.add_argument('-x', '--xmax', type=int, default=80, help='Set custom grid width. (default=80)')
-    parser.add_argument('-y', '--ymax', type=int, default=25, help='Set custom grid height. (default=25)')
+    parser.add_argument('-x', '--xmax', type=int, default=128, help='Set custom grid width. (default=128)')
+    parser.add_argument('-y', '--ymax', type=int, default=32, help='Set custom grid height. (default=32)')
     args = parser.parse_args()
     fungeball.main(args.file,args.xmax,args.ymax)
 
