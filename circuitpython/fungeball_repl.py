@@ -1,5 +1,5 @@
 '''
-Fungeball Interpreter v1.0-beta5a Library
+Fungeball Interpreter v1.0-beta6 Library
 
 Copyright (c) 2025 Sara Berman
 
@@ -38,11 +38,13 @@ class Fungeball:
         self.ibuf=b''
         self.obuf=b''
         self.waitmode=False
+        self.label=0
         self.threads=1
         self.tstacks=[[0,0,0]]
         self.tdelta=[[1,0]]
         self.tpos=[[0,0]]
         self.tsmode=[[0]]
+        self.tlabels=[[0]]
         self.tnew=False
         self.stdin=stdin
         self.stdout=stdout
@@ -359,9 +361,11 @@ class Fungeball:
                 a=self.cstack[b%16].pop()
                 self.stack.append(a)
             elif gch == b'w':
-                if self.threads == 1:
+                a=self.stack.pop()
+                if self.threads <= (a+1):
                     self.waitmode=False
                 else:
+                    self.stack.append(a)
                     self.waitmode=True
             elif gch == b'a':
                 self.stack.append(10)
@@ -375,6 +379,31 @@ class Fungeball:
                 self.stack.append(14)
             elif gch == b'f':
                 self.stack.append(15)
+            elif gch == b'h':
+                b=self.stack.pop()
+                a=self.stack.pop()
+                self.stack.append(a*16+(b%16))
+            elif gch == b'k':
+                a=self.stack.pop()
+                lc=0
+                i=0
+                for i in range(self.tlabels):
+                    if self.tlabels[i][0] == a:
+                        lc = lc + 1
+                    else:
+                        pass
+                if lc == 0:
+                    self.waitmode=False
+                else:
+                    self.stack.append(a)
+                    self.waitmode=True
+            elif gch == b'l':
+                a=self.stack.pop()
+                self.label=a
+            elif gch == b'x':
+                b=self.stack.pop()
+                a=self.stack.pop()
+                self.stack.append((a%16)*16+(b%16))
             else:
                 self.xdir=self.xdir*-1
                 self.ydir=self.ydir*-1
@@ -402,6 +431,7 @@ class Fungeball:
             tsm=[]
             tp=[]
             td=[]
+            tl=[]
             new_t=[]
             self.stack=[]
             for ti in range(self.threads):
@@ -420,6 +450,7 @@ class Fungeball:
                 else:
                     self.smode=True
                     self.waitmode=False
+                self.label=self.tlabels[ti][0]
                 run=self.run_thread()
                 if run < 0 or run > 1:
                     trun=run-2
@@ -430,9 +461,10 @@ class Fungeball:
                         pass
                     else:
                         tn=tn+1
-                        new_t.append([[],[(self.xmax + self.xpos - self.xdir) % self.xmax,(self.ymax + self.ypos - self.ydir) % self.ymax],[self.xdir*-1,self.ydir*-1],[0,0]])
+                        new_t.append([[],[(self.xmax + self.xpos - self.xdir) % self.xmax,(self.ymax + self.ypos - self.ydir) % self.ymax],[self.xdir*-1,self.ydir*-1],[0],[]])
                         for si in range(len(self.stack)):
                             new_t[0].append(self.stack[si])
+                        new_t[4].append(self.label)
                         self.tnew=False
                     if self.waitmode == False:
                         self.move_pc()
@@ -445,6 +477,7 @@ class Fungeball:
                         tsm.append([0])
                     else:
                         tsm.append([1])
+                    tl.append([self.label])
                 self.stack=[]
             if len(new_t) > 0:
                 i=0
@@ -453,13 +486,15 @@ class Fungeball:
                     tp.append(new_t[i][1])
                     td.append(new_t[i][2])
                     tsm.append(new_t[i][3])
+                    tl.append(new_t[i][4])
             else:
                 pass
-            #print('{',tn,ts,tp,td,tsm,self.cstack,'}')
+            #print('{',tn,ts,tp,td,tsm,'}\n{{',self.cstack,'}}')
             self.tstacks=ts
             self.tpos=tp
             self.tdelta=td
             self.tsmode=tsm
+            self.tlabels=tl
             self.threads=tn
         return trun
 

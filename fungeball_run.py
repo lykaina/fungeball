@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 '''
-Fungeball Interpreter v1.0-beta5a Wrapper
+Fungeball Interpreter v1.0-beta6 Wrapper
 
 Copyright (c) 2025 Sara Berman
 

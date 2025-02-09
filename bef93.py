@@ -1,5 +1,5 @@
 '''
-Befunge-93 Interpreter v1.0-beta5a Library
+Befunge-93 Interpreter v1.0-beta6 Library
 
 Copyright (c) 2025 Sara Berman
 
